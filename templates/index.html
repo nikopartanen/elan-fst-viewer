@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Uralic Morphological Analyzer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="p-6 bg-gray-100">
+    <div class="max-w-2xl mx-auto">
+        <form method="POST" enctype="multipart/form-data" class="mb-4">
+            <div class="flex space-x-2 mb-2">
+                <select 
+                    name="language" 
+                    class="p-2 border rounded flex-shrink"
+                >
+                    <option value="smn" {{ 'selected' if selected_language == 'smn' }}>Inari Sami (smn)</option>
+                    <option value="sms" {{ 'selected' if selected_language == 'sms' }}>Skolt Sami (sms)</option>
+                    <option value="sme" {{ 'selected' if selected_language == 'sme' }}>Northern Sami (sme)</option>
+                    <option value="sjd" {{ 'selected' if selected_language == 'sjd' }}>Kildin Sami (sjd)</option>
+                    <option value="kpv" {{ 'selected' if selected_language == 'kpv' }}>Komi-Permyak (kpv)</option>
+                </select>
+                <input 
+                    type="text" 
+                    name="text" 
+                    value="{{ text }}"
+                    placeholder="Enter text to analyze" 
+                    class="w-full p-2 border rounded"
+                >
+            </div>
+            <div class="flex space-x-2 mb-2">
+                <input 
+                    type="text" 
+                    name="xml_param" 
+                    value="{{ xml_param }}"
+                    placeholder="XML Parameter (default: orth@)" 
+                    class="w-full p-2 border rounded"
+                >
+                <input 
+                    type="file" 
+                    name="xml_file" 
+                    accept=".eaf"
+                    class="p-2 border rounded flex-shrink"
+                >
+            </div>
+            <div class="flex space-x-2">
+                <button 
+                    type="submit" 
+                    class="bg-blue-500 text-white p-2 rounded flex-grow"
+                >
+                    Analyze
+                </button>
+                <button 
+                    type="submit" 
+                    name="show_unknown"
+                    value="true"
+                    class="{{ 'bg-green-500' if show_unknown_only else 'bg-gray-300' }} text-white p-2 rounded flex-grow"
+                >
+                    Show Unknown Words
+                </button>
+            </div>
+        </form>
+
+        {% if disambiguations and disambiguations|length > 0 %}
+        <div class="flex flex-wrap gap-2">
+            {% for item in disambiguations %}
+            <div class="
+                p-2 rounded-md shadow-sm 
+                {{ 'bg-red-100' if item.analyses[0].morphology[0] == 'Unknown' else 'bg-white' }}
+            ">
+                <div class="font-bold">{{ item.word }}</div>
+                {% for analysis in item.analyses %}
+                <div class="text-xs">
+                    <div>{{ analysis.lemma }}</div>
+                    <div class="text-gray-500">
+                        {{ analysis.morphology|join(' • ') }}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+        {% elif text %}
+        <div class="text-center text-white bg-gray-500 p-4 rounded mt-4">
+            No analysis results available.
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>
